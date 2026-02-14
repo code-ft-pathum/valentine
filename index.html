@@ -97,6 +97,123 @@
         }
 
         .flower-fork { font-size: 3rem; display: inline-block; margin: 10px; }
+
+        /* Gallery Styling */
+        #gallery-section {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, var(--soft-pink) 0%, #ffe5ec 100%);
+            z-index: 1001;
+            overflow-y: auto;
+            padding: 40px 20px;
+        }
+
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease;
+        }
+
+        .gallery-header h2 {
+            font-size: 2.5rem;
+            color: var(--deep-red);
+            margin-bottom: 10px;
+        }
+
+        .gallery-header p {
+            font-size: 1.2rem;
+            color: var(--rose);
+            font-style: italic;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(255, 77, 109, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: white;
+            animation: scaleIn 0.5s ease backwards;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(255, 77, 109, 0.3);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-item::before {
+            content: '❤️';
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .gallery-item:hover::before {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Modal for fullscreen image */
+        #image-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        #image-modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(255, 77, 109, 0.5);
+        }
+
+        #image-modal .close-btn {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        @media (max-width: 768px) {
+            .gallery-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; }
+            .gallery-item img { height: 200px; }
+            .gallery-header h2 { font-size: 2rem; }
+        }
     </style>
 </head>
 <body>
@@ -149,6 +266,28 @@
         <p style="margin-top: 30px; font-style: italic; color: #ff758f;">See you on Valentine's Day!</p>
     </div>
 
+    <!-- Gallery Section -->
+    <div id="gallery-section">
+        <div class="gallery-header">
+            <h2>💕 Our Beautiful Memories 💕</h2>
+            <p>Every moment with you is a treasure</p>
+        </div>
+        <div class="gallery-grid" id="gallery-grid">
+            <!-- Images will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="image-modal" onclick="closeModal()">
+        <span class="close-btn">×</span>
+        <img id="modal-image" src="" alt="">
+    </div>
+
+    <!-- Audio Player -->
+    <audio id="background-music" loop>
+        <source src="audio/Supem_Suwandak_Aran_Roshan_Fernando_Sarigama_lk.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
         // 1. Navigation Logic
         function go(step) {
@@ -193,6 +332,67 @@
                     spawnParticles(20); // Extra hearts
                 }, i * 200);
             }
+            
+            // Show gallery after 4 seconds
+            setTimeout(() => {
+                final.style.display = 'none';
+                showGallery();
+            }, 4000);
+        }
+
+        // 3.5 Gallery Logic
+        const images = [
+            '1711523639470.jpg',
+            '1711523789524.jpg',
+            '1742090398615.jpg',
+            '20240326_132712.jpg',
+            '20240326_135609.jpg',
+            '20250316_073525.jpg',
+            '20251005_213341.jpg',
+            'IMG-20241021-WA0089.jpg'
+        ];
+
+        function showGallery() {
+            const gallery = document.getElementById('gallery-section');
+            const grid = document.getElementById('gallery-grid');
+            
+            gallery.style.display = 'block';
+            
+            // Play background music
+            const music = document.getElementById('background-music');
+            music.volume = 0.5; // Set volume to 50%
+            music.play().catch(e => console.log('Audio autoplay prevented:', e));
+            
+            images.forEach((img, index) => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.style.animationDelay = (index * 0.1) + 's';
+                
+                const imgEl = document.createElement('img');
+                imgEl.src = 'images/' + img;
+                imgEl.alt = 'Memory ' + (index + 1);
+                imgEl.onclick = (e) => {
+                    e.stopPropagation();
+                    openModal('images/' + img);
+                };
+                
+                item.appendChild(imgEl);
+                grid.appendChild(item);
+            });
+            
+            // Extra particle burst
+            spawnParticles(30);
+        }
+
+        function openModal(src) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            modalImg.src = src;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('image-modal').style.display = 'none';
         }
 
         // 4. Background Animation
