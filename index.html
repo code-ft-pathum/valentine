@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A Special Journey for You</title>
+    <style>
+        :root {
+            --rose: #ff4d6d;
+            --soft-pink: #fff0f3;
+            --deep-red: #c9184a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+
+        body {
+            height: 100vh;
+            background: var(--soft-pink);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        /* Floating Atmosphere */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-20vh) rotate(360deg); opacity: 0; }
+        }
+
+        /* Card Styling */
+        .container {
+            position: relative;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 40px rgba(255, 77, 109, 0.15);
+            text-align: center;
+            z-index: 10;
+            width: 90%;
+            max-width: 420px;
+            transition: all 0.5s ease;
+        }
+
+        .step { display: none; }
+        .step.active { display: block; animation: fadeIn 0.5s ease; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+
+        h1 { color: var(--deep-red); font-size: 1.6rem; margin-bottom: 1.5rem; line-height: 1.4; }
+        
+        .image-box { font-size: 4rem; margin-bottom: 1rem; }
+
+        .btn-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            min-height: 60px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-yes { background: var(--rose); color: white; }
+        .btn-no { background: #eee; color: #666; transition: all 0.2s ease; }
+
+        /* Final Screen */
+        #final-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .flower-fork { font-size: 3rem; display: inline-block; margin: 10px; }
+    </style>
+</head>
+<body>
+
+    <div id="particle-container"></div>
+
+    <div class="container" id="main-card">
+        <div class="step active" id="s1">
+            <div class="image-box">🤔</div>
+            <h1>Can I ask you a few questions?</h1>
+            <div class="btn-wrapper">
+                <button class="btn btn-yes" onclick="go(2)">Sure!</button>
+                <button class="btn btn-no" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
+            </div>
+        </div>
+
+        <div class="step" id="s2">
+            <div class="image-box">☁️</div>
+            <h1>Do you think we make a good team?</h1>
+            <div class="btn-wrapper">
+                <button class="btn btn-yes" onclick="go(3)">The Best!</button>
+                <button class="btn btn-no" onmouseover="flee(this)" ontouchstart="flee(this)">Not really</button>
+            </div>
+        </div>
+
+        <div class="step" id="s3">
+            <div class="image-box">🍨</div>
+            <h1>Is life better when we are together?</h1>
+            <div class="btn-wrapper">
+                <button class="btn btn-yes" onclick="go(4)">Definitely</button>
+                <button class="btn btn-no" onmouseover="flee(this)" ontouchstart="flee(this)">Maybe</button>
+            </div>
+        </div>
+
+        <div class="step" id="s4">
+            <div class="image-box">🌹</div>
+            <h1>Then... Will you be my Valentine?</h1>
+            <div class="btn-wrapper">
+                <button class="btn btn-yes" onclick="finish()">YES! ❤️</button>
+                <button class="btn btn-no" id="final-no" onmouseover="flee(this)" ontouchstart="flee(this)">No</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="final-screen">
+        <h1 style="font-size: 2.5rem;">YAY! 🥰</h1>
+        <p style="font-size: 1.2rem; color: #c9184a;">You've made me the happiest person!</p>
+        <div id="flower-display">
+            </div>
+        <p style="margin-top: 30px; font-style: italic; color: #ff758f;">See you on Valentine's Day!</p>
+    </div>
+
+    <script>
+        // 1. Navigation Logic
+        function go(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('s' + step).classList.add('active');
+            
+            // Bring the "No" button back to the container for the next question
+            const currentNo = document.querySelector('.step.active .btn-no');
+            currentNo.style.position = 'relative';
+            currentNo.style.left = '0';
+            currentNo.style.top = '0';
+        }
+
+        // 2. The Elusive "No" Button Logic
+        function flee(btn) {
+            btn.style.position = 'fixed';
+            const padding = 60;
+            const x = Math.random() * (window.innerWidth - btn.clientWidth - padding) + (padding/2);
+            const y = Math.random() * (window.innerHeight - btn.clientHeight - padding) + (padding/2);
+            
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+        }
+
+        // 3. Final Surprise Logic
+        function finish() {
+            document.getElementById('main-card').style.display = 'none';
+            const final = document.getElementById('final-screen');
+            final.style.display = 'flex';
+            
+            // Flower Forks effect
+            const flowerBox = document.getElementById('flower-display');
+            const items = ['🌷', '🌹', '🌺', '🌸', '🌼', '🍴'];
+            
+            for(let i = 0; i < 15; i++) {
+                setTimeout(() => {
+                    const span = document.createElement('span');
+                    span.className = 'flower-fork';
+                    span.innerHTML = items[Math.floor(Math.random() * items.length)];
+                    span.style.animation = `fadeIn 0.5s ease backwards`;
+                    flowerBox.appendChild(span);
+                    spawnParticles(20); // Extra hearts
+                }, i * 200);
+            }
+        }
+
+        // 4. Background Animation
+        const pContainer = document.getElementById('particle-container');
+        const pTypes = ['❤️', '🌸', '✨', '🌹'];
+
+        function spawnParticles(amt) {
+            for(let i=0; i<amt; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                p.innerHTML = pTypes[Math.floor(Math.random() * pTypes.length)];
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                p.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                p.style.bottom = '-10vh';
+                pContainer.appendChild(p);
+                setTimeout(() => p.remove(), 7000);
+            }
+        }
+
+        setInterval(() => spawnParticles(1), 400);
+    </script>
+</body>
+</html>
